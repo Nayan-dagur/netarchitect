@@ -1,0 +1,36 @@
+{
+  "profile_name": "Global WAN",
+  "description": "4 Global Cities + Cloud VPC, 2,000 IoT/scanners, IPsec VPN overlay, Multi-Area OSPF + eBGP-4, and CIDR route summarization.",
+  "topology_tier": "global_wan",
+  "multi_site": true,
+  "multi_cloud": true,
+  "autonomous_system": 65300,
+  "redundancy_mode": "multi_homed_bgp",
+  "target_latency_ms": 85.0,
+  "root_prefix": "10.30.0.0/16",
+  "sites": [
+    { "name": "City-NYC-Hub", "role": "hq", "endpoints": 200, "poe_aps": 10, "iot_scanners": 500 },
+    { "name": "City-LON-Hub", "role": "remote", "endpoints": 150, "poe_aps": 8, "iot_scanners": 500 },
+    { "name": "City-SIN-Hub", "role": "remote", "endpoints": 150, "poe_aps": 8, "iot_scanners": 500 },
+    { "name": "City-FRA-Hub", "role": "remote", "endpoints": 120, "poe_aps": 6, "iot_scanners": 500 },
+    { "name": "AWS-Cloud-VPC", "role": "cloud_vpc", "endpoints": 80, "poe_aps": 0, "iot_scanners": 0 }
+  ],
+  "links": [
+    { "name": "NYC-Campus-Access", "src": "NYC-Core", "dst": "NYC-Scanners", "distance_m": 85, "bandwidth_gbps": 10.0, "requested_media": "auto", "role": "access" },
+    { "name": "NYC-DC-CrossConnect", "src": "NYC-Core", "dst": "NYC-ISP-POP", "distance_m": 320, "bandwidth_gbps": 10.0, "requested_media": "auto", "role": "backbone" },
+    { "name": "NYC-to-LON-IPsec-WAN", "src": "City-NYC-Hub", "dst": "City-LON-Hub", "distance_m": 5570000, "bandwidth_gbps": 10.0, "requested_media": "auto", "role": "wan", "dual_homed": true, "require_ipsec": true },
+    { "name": "LON-to-FRA-Metro-WAN", "src": "City-LON-Hub", "dst": "City-FRA-Hub", "distance_m": 640000, "bandwidth_gbps": 10.0, "requested_media": "auto", "role": "wan", "dual_homed": true, "require_ipsec": true },
+    { "name": "FRA-to-SIN-IPsec-WAN", "src": "City-FRA-Hub", "dst": "City-SIN-Hub", "distance_m": 10200000, "bandwidth_gbps": 10.0, "requested_media": "auto", "role": "wan", "dual_homed": true, "require_ipsec": true },
+    { "name": "NYC-to-CloudVPC-Tunnel", "src": "City-NYC-Hub", "dst": "AWS-Cloud-VPC", "distance_m": 450000, "bandwidth_gbps": 10.0, "requested_media": "auto", "role": "wan", "dual_homed": true, "require_ipsec": true }
+  ],
+  "subnet_requests": [
+    { "name": "Global-IoT-Scanners-Americas", "hosts": 1000, "vlan_id": 50, "security_zone": "iot", "area": 1 },
+    { "name": "Global-IoT-Scanners-EMEA-APAC", "hosts": 1000, "vlan_id": 51, "security_zone": "iot", "area": 2 },
+    { "name": "Global-Corp-Operations", "hosts": 500, "vlan_id": 10, "security_zone": "corp", "area": 0 },
+    { "name": "Cloud-VPC-Workloads", "hosts": 200, "vlan_id": 60, "security_zone": "cloud", "area": 3 },
+    { "name": "Global-SecOps-Mgmt", "hosts": 60, "vlan_id": 99, "security_zone": "mgmt", "area": 0 },
+    { "name": "WAN-IPsec-VTI-NYC-LON", "hosts": 2, "security_zone": "wan_p2p", "area": 0 },
+    { "name": "WAN-IPsec-VTI-LON-FRA", "hosts": 2, "security_zone": "wan_p2p", "area": 0 },
+    { "name": "WAN-IPsec-VTI-NYC-VPC", "hosts": 2, "security_zone": "wan_p2p", "area": 0 }
+  ]
+}

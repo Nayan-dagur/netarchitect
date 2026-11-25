@@ -1,0 +1,28 @@
+{
+  "profile_name": "Campus LAN",
+  "description": "3-Building University/Enterprise Campus (<400m inter-building backbone), 1,600 endpoints + PoE APs, Cat6a access, OM4 MMF backbone, 802.1Q VLANs, RSTP, Single-Area OSPFv2.",
+  "topology_tier": "campus_lan",
+  "multi_site": false,
+  "multi_cloud": false,
+  "redundancy_mode": "rstp_redundant",
+  "target_latency_ms": 10.0,
+  "root_prefix": "10.10.0.0/16",
+  "sites": [
+    { "name": "Building-A-Core", "role": "hq", "endpoints": 650, "poe_aps": 28, "iot_scanners": 0 },
+    { "name": "Building-B-Eng", "role": "building", "endpoints": 550, "poe_aps": 24, "iot_scanners": 0 },
+    { "name": "Building-C-Lab", "role": "building", "endpoints": 400, "poe_aps": 18, "iot_scanners": 0 }
+  ],
+  "links": [
+    { "name": "BldgA-Access-Drop", "src": "BldgA-IDF1", "dst": "BldgA-Endpoints", "distance_m": 75, "bandwidth_gbps": 10.0, "requested_media": "auto", "role": "access" },
+    { "name": "BldgA-to-BldgB-Backbone", "src": "Building-A-Core", "dst": "Building-B-Eng", "distance_m": 240, "bandwidth_gbps": 10.0, "requested_media": "auto", "role": "backbone", "dual_homed": true },
+    { "name": "BldgA-to-BldgC-Backbone", "src": "Building-A-Core", "dst": "Building-C-Lab", "distance_m": 360, "bandwidth_gbps": 10.0, "requested_media": "auto", "role": "backbone", "dual_homed": true },
+    { "name": "BldgB-to-BldgC-Ring", "src": "Building-B-Eng", "dst": "Building-C-Lab", "distance_m": 195, "bandwidth_gbps": 10.0, "requested_media": "auto", "role": "backbone" }
+  ],
+  "subnet_requests": [
+    { "name": "Campus-Workstations", "hosts": 1200, "vlan_id": 10, "security_zone": "corp", "area": 0 },
+    { "name": "Campus-Wireless-PoE", "hosts": 400, "vlan_id": 20, "security_zone": "corp", "area": 0 },
+    { "name": "Campus-VoIP", "hosts": 250, "vlan_id": 30, "security_zone": "voice", "area": 0 },
+    { "name": "Campus-NetMgmt", "hosts": 60, "vlan_id": 99, "security_zone": "mgmt", "area": 0 },
+    { "name": "Core-to-Edge-P2P", "hosts": 2, "security_zone": "wan_p2p", "area": 0 }
+  ]
+}

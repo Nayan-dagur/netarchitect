@@ -1,0 +1,32 @@
+{
+  "profile_name": "Metro MAN",
+  "description": "HQ + 2 Remote Metro Branches (15-35km) + FinTech Colo, 450 users, OS2 SMF, EVPL, Sub-5ms QoS, dual-homed failover.",
+  "topology_tier": "metro_man",
+  "multi_site": true,
+  "multi_cloud": false,
+  "autonomous_system": 65200,
+  "redundancy_mode": "dual_homed",
+  "target_latency_ms": 4.5,
+  "root_prefix": "10.20.0.0/16",
+  "sites": [
+    { "name": "Metro-HQ", "role": "hq", "endpoints": 220, "poe_aps": 12, "iot_scanners": 0 },
+    { "name": "Metro-Branch-North", "role": "remote", "endpoints": 120, "poe_aps": 6, "iot_scanners": 0 },
+    { "name": "Metro-Branch-South", "role": "remote", "endpoints": 110, "poe_aps": 6, "iot_scanners": 0 },
+    { "name": "FinTech-Colo-DC", "role": "colo", "endpoints": 40, "poe_aps": 0, "iot_scanners": 0 }
+  ],
+  "links": [
+    { "name": "HQ-Access-LAN", "src": "HQ-Core", "dst": "HQ-Trading-Desks", "distance_m": 60, "bandwidth_gbps": 10.0, "requested_media": "auto", "role": "access" },
+    { "name": "HQ-to-BranchNorth-EVPL", "src": "Metro-HQ", "dst": "Metro-Branch-North", "distance_m": 22000, "bandwidth_gbps": 10.0, "requested_media": "auto", "role": "man", "dual_homed": true, "max_latency_ms": 4.5 },
+    { "name": "HQ-to-BranchSouth-EVPL", "src": "Metro-HQ", "dst": "Metro-Branch-South", "distance_m": 31500, "bandwidth_gbps": 10.0, "requested_media": "auto", "role": "man", "dual_homed": true, "max_latency_ms": 4.5 },
+    { "name": "HQ-to-FinTech-Colo", "src": "Metro-HQ", "dst": "FinTech-Colo-DC", "distance_m": 16500, "bandwidth_gbps": 10.0, "requested_media": "auto", "role": "man", "dual_homed": true, "max_latency_ms": 4.5 }
+  ],
+  "subnet_requests": [
+    { "name": "HQ-Trading-Users", "hosts": 250, "vlan_id": 10, "security_zone": "corp", "area": 0 },
+    { "name": "Remote-Branches-Corp", "hosts": 200, "vlan_id": 20, "security_zone": "corp", "area": 1 },
+    { "name": "FinTech-Colo-Compute", "hosts": 60, "vlan_id": 40, "security_zone": "dmz", "area": 2 },
+    { "name": "LowLatency-Voice-Trading", "hosts": 50, "vlan_id": 30, "security_zone": "voice", "area": 0 },
+    { "name": "Metro-OOB-Mgmt", "hosts": 28, "vlan_id": 99, "security_zone": "mgmt", "area": 0 },
+    { "name": "EVPL-Primary-P2P", "hosts": 2, "security_zone": "wan_p2p", "area": 0 },
+    { "name": "EVPL-Failover-P2P", "hosts": 2, "security_zone": "wan_p2p", "area": 0 }
+  ]
+}
