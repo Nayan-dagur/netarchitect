@@ -20,6 +20,7 @@ def select_routing_architecture(
     if not is_multi_domain and not is_large_or_multi_site:
         igp = "Single-Area OSPFv2 (Area 0)"
         egp = None
+        area_summaries = _compute_area_summaries(vlsm_plan)
         summary_routes = [vlsm_plan.summary_route_cidr]
         summarization = False
         justifications.append(
@@ -31,7 +32,8 @@ def select_routing_architecture(
         igp = "Multi-Area OSPFv2 (Backbone Area 0 + Regional Areas)"
         egp = None
         summarization = True
-        summary_routes = _compute_area_summaries(vlsm_plan)
+        area_summaries = _compute_area_summaries(vlsm_plan)
+        summary_routes = list(area_summaries.values())
         justifications.append(
             f"Selected {igp} (RFC 2328) because the network spans multiple sites/areas ({areas}) "
             f"requiring hierarchical LSDB isolation so Type-1/Type-2 LSA flooding stays contained within "
@@ -45,7 +47,8 @@ def select_routing_architecture(
         )
         egp = f"eBGP-4 (AS {spec.autonomous_system or 65100}, RFC 4271)"
         summarization = True
-        summary_routes = _compute_area_summaries(vlsm_plan)
+        area_summaries = _compute_area_summaries(vlsm_plan)
+        summary_routes = list(area_summaries.values())
         if vlsm_plan.summary_route_cidr not in summary_routes:
             summary_routes.insert(0, vlsm_plan.summary_route_cidr)
         justifications.append(
@@ -73,16 +76,17 @@ def select_routing_architecture(
         ospf_areas=areas if areas else [0],
         route_summarization_enabled=summarization,
         summary_routes=summary_routes,
+        area_summary_routes=area_summaries,
         ipsec_vpn_enabled=ipsec_needed,
         justifications=justifications,
     )
 
 
-def _compute_area_summaries(vlsm_plan: VLSMPlan) -> list[str]:
+def _compute_area_summaries(vlsm_plan: VLSMPlan) -> dict[int, str]:
     by_area: dict[int, list[tuple[int, int]]] = {}
     for subnet in vlsm_plan.subnets:
         net_int, prefix_len = parse_cidr(subnet.cidr)
         mask_int = prefix_to_mask_int(prefix_len)
         bcast_int = net_int | ((~mask_int) & 0xFFFFFFFF)
         by_area.setdefault(subnet.area, []).append((net_int, bcast_int))
-    return [compute_summary_cidr(ranges) for _, ranges in sorted(by_area.items())]
+    return {area_id: compute_summary_cidr(ranges) for area_id, ranges in sorted(by_area.items())}

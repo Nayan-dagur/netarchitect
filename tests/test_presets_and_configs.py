@@ -53,6 +53,9 @@ def test_profile3_global_wan_end_to_end() -> None:
     assert "tunnel mode ipsec ipv4" in cfg
     assert "aggregate-address" in cfg
     assert "ACL-IOT-V50-IN" in cfg
+    assert "area 1 range 10.30.4.0 255.255.252.0" in cfg
+    assert "area 2 range 10.30.0.0 255.255.252.0" in cfg
+    assert "area 3 range 10.30.10.0 255.255.255.0" in cfg
 
     md = format_rationale_markdown(plan)
     assert "# Architectural Rationale Report: Global WAN" in md

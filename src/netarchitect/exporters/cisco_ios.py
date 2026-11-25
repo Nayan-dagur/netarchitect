@@ -285,8 +285,8 @@ def generate_cisco_ios_configs(
     for s in vlsm.subnets:
         rtr_lines.append(f" network {s.network_address} {s.wildcard_mask} area {s.area}")
 
-    if routing.route_summarization_enabled and len(routing.ospf_areas) > 1:
-        for area_id, sum_cidr in zip(routing.ospf_areas, routing.summary_routes):
+    if routing.route_summarization_enabled and len(routing.area_summary_routes) > 1:
+        for area_id, sum_cidr in sorted(routing.area_summary_routes.items()):
             net_int, plen = parse_cidr(sum_cidr)
             mask_str = int_to_ip(prefix_to_mask_int(plen))
             rtr_lines.append(f" area {area_id} range {int_to_ip(net_int)} {mask_str}")

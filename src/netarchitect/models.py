@@ -133,6 +133,7 @@ class RoutingRecommendation(BaseModel):
     ospf_areas: list[int]
     route_summarization_enabled: bool
     summary_routes: list[str]
+    area_summary_routes: dict[int, str] = Field(default_factory=dict)
     ipsec_vpn_enabled: bool
     justifications: list[str]
 
